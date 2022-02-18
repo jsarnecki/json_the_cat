@@ -1,29 +1,27 @@
 const request = require("request");
 const args = process.argv.slice(2);
-  //Allow for CLI args, with first arg being name
-  //and return descripttion for that name
 
-const catFirstLetters = args[0].slice(0, 4);
-//In the case of names being too long or two words, slice the first few characters to search on API
+const fetchBreedDescription = function(breedName, callback) {
 
-request(`https://api.thecatapi.com/v1/breeds/search?q=${catFirstLetters}`, (error, response, body) => {
-  
-  if (error) {
-    console.log("error: ", error);
-  }
+  request(`https://api.thecatapi.com/v1/breeds/search?q=${breedName}`, (error, response, body) => {
 
   const data = JSON.parse(body);
   //Turns raw data into JSON to be manipulated
 
   if (data[0] === undefined) {
-    //Prints message if database does not find info on cat input
-    console.log(`Sorry, unable to find information on ${args[0]}`);
-    process.exit();
+    /*return the first callback (see index.js) parameter if not found, 
+    intently adding in null in 2nd param to avoid the desc as it did not find one */
+    return callback(`Sorry, unable to find information on ${breedName}`, null);
   }
 
-  console.log(`${args[0]} Breed description: `, data[0].description);
+  return callback(null, `${breedName} Breed description: ${data[0].description}`);
+  //return inside the 2nd param of the callback, intently adding null in first to avoid the err
   //If the search finds the input, it will print the description
 
   ///Notes:
   ////The data is an array of objects, and each obj is a different breed
-});
+  });
+
+};
+
+module.exports = { fetchBreedDescription };
